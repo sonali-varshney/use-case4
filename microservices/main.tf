@@ -23,7 +23,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpcdemo.id
 
   tags = {
-    Name = igw
+    Name = "igw"
   }
 }
 
@@ -89,7 +89,7 @@ resource "aws_eks_cluster" "myekscluster" {
 #    authentication_mode = "API"
 # }
 
-  role_arn = aws_iam_role.cluster.arn
+  role_arn = aws_iam_role.eksclusterrole.arn
   version  = "1.31"
 
   vpc_config {
