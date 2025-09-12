@@ -1,4 +1,4 @@
-name: Sample github workflow
+name: EKS workflow
 on:
   workflow_dispatch:
 
