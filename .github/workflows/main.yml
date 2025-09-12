@@ -6,6 +6,9 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: testing
     permissions:    # NOTE
       id-token: write
       contents: read
