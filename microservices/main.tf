@@ -94,8 +94,7 @@ resource "aws_eks_cluster" "myekscluster" {
 
   vpc_config {
     subnet_ids = [aws_subnet.prv_subnet.id]
-# endpoint_private_access = false  #For a fully private cluster where kubectl access must happen from within the VPC (e.g., via a bastion host or VPN), you must:
-Set endpoint_private_access = true on the aws_eks_cluster resource and endpoint_public_access = false.
+# endpoint_private_access = false  #For a fully private cluster where kubectl access must happen from within the VPC (e.g., via a bastion host or VPN), you must:Set endpoint_private_access = true on the aws_eks_cluster resource and endpoint_public_access = false.
 
 #    endpoint_public_access  = true
   }
