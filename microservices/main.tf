@@ -1,7 +1,7 @@
 resource "aws_vpc" "vpcdemo" {
   cidr_block = "10.0.0.0/16"
   tags = {
-    Name = myvpc
+    Name = "myvpc"
   }
   enable_dns_hostnames = true # if not enabled, we can't resolve dns names
 }
@@ -166,7 +166,7 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
 
 ############################ EKS Node Group Role ###########################
 resource "aws_iam_role" "eks_node_role" {
-  name = "${var.cluster_name}-eks-node-role"
+  name = "${aws_eks_cluster.myekscluster.name}-eks-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
