@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: testing
+        working-directory: microservices
     permissions:    # NOTE
       id-token: write
       contents: read
