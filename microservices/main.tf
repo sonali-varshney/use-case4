@@ -269,7 +269,7 @@ cloudwatch:
   # Optionally multi-line parsing, filters etc
 EOF
   ]
-  depends_on = aws_eks_cluster.myekscluster #[module.eks]
+  depends_on = [aws_eks_cluster.myekscluster,] #[module.eks]
 }
 #This deploys Fluent Bit that reads pod logs and ships to CloudWatch Logs. You can also install the CloudWatch Container Insights agent if you need metrics; many teams combine both.
 
