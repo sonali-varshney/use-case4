@@ -198,6 +198,7 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
 
 
 ############################ EKS Node Group Role ###########################
+
 resource "aws_iam_role" "eks_node_role" {
   name = "${aws_eks_cluster.myekscluster.name}-eks-node-role"
 
@@ -231,7 +232,7 @@ resource "aws_iam_role_policy_attachment" "eks_node_policy_3" {
 }
 
 
- ########################################## EKS Control Plane Logging  ######################################################
+ ########################################## CloudWatch log group for EKS Control Plane Logging  ######################################################
 
 # You need a log group to manage the retention policy for the EKS logs.
 # EKS automatically creates the log streams within this log group.
@@ -240,3 +241,38 @@ resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
   name              = "/aws/eks/${aws_eks_cluster.myekscluster.name}/cluster"
   retention_in_days = 1 # Customize retention as needed.
 }
+
+######################################### CloudWatch log group for application logs (optional consolidation point)  #########################################
+
+resource "aws_cloudwatch_log_group" "app_logs" {
+  name              = "/aws/eks/${var.cluster_name}/app-logs"
+  retention_in_days = 30
+}
+
+
+########################################## Deploy Fluent Bit using Helm to send App logs to CloudWatch Logs  #########################################
+
+resource "helm_release" "aws_for_fluent_bit" {
+  name       = "aws-for-fluent-bit"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-for-fluent-bit"
+  version    = "0.18.0" # or newer available
+
+  namespace = "kube-system"
+  create_namespace = false
+
+  # Set the CloudWatch log group name and region
+  values = [
+    <<EOF
+cloudwatch:
+  enabled: true
+  region: ${var.aws_region}
+  log_group_name: ${aws_cloudwatch_log_group.app_logs.name}
+  log_stream_prefix: from-fluent-bit-
+  # Optionally multi-line parsing, filters etc
+EOF
+  ]
+  depends_on = aws_eks_cluster.myekscluster #[module.eks]
+}
+#This deploys Fluent Bit that reads pod logs and ships to CloudWatch Logs. You can also install the CloudWatch Container Insights agent if you need metrics; many teams combine both.
+
