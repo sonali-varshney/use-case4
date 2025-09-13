@@ -3,10 +3,20 @@ kind: Ingress
 metadata:
   name: myingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+	kubernetes.io/ingress.class: alb                # Tells EKS to use AWS ALB ingress controller
+    alb.ingress.kubernetes.io/scheme: internet-facing   # Or "internal" if you want private ALB
+    alb.ingress.kubernetes.io/target-type: ip  
+	alb.ingress.kubernetes.io/listen-ports: <> # '[{"HTTP": 80}, {"HTTPS":443}]'  # Listener config
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:acct:cert/xxxxxxx   # Required if using HTTPS
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'   # Redirects HTTP → HTTPS
+    alb.ingress.kubernetes.io/security-groups: <> #sg-xxxxxx   # (Optional) Attach custom security group to ALB
+    alb.ingress.kubernetes.io/subnets: <> # subnet-aaa,subnet-bbb   # (Optional) Place ALB in specific public subnets
+    alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=true  # Extra LB attributes
+
 	# Add TLS / auth / rewrite annotations as needed
 spec:
-  ingressClassName: <> #nginx-example
+  ingressClassName: alb # alb is required so AWS Load Balancer Controller picks it up
   rules:
   - http:
       paths:
@@ -24,3 +34,7 @@ spec:
             name: mysvc
             port:
               number: <>
+
+#If you don’t specify alb.ingress.kubernetes.io/subnets, the controller auto-detects public/private subnets tagged with:
+# kubernetes.io/role/elb = 1       (for public ALB subnets)
+# kubernetes.io/role/internal-elb = 1  (for private ALB subnets)
