@@ -10,8 +10,8 @@ resource "aws_subnet" "pubsubnet" {
   vpc_id     = aws_vpc.vpcdemo.id
   count      = 2                     #Note
 
-  cidr_block = ["10.0.0.0/24","10.0.1.0/24"]                #Note
-  availability_zone = ["us-east-1a","us-east-1b"]  #Note
+  cidr_block = ["10.0.0.0/24","10.0.1.0/24"][count.index]                #Note
+  availability_zone = ["us-east-1a","us-east-1b"][count.index]  #Note
   map_public_ip_on_launch = true   # to indicate that instances launched into the subnet should be assigned a public IP address
   
   tags = {
