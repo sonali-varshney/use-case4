@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydeployment
+  labels:
+    app: flaskapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flaskapp
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+      - name: myapp
+        image: <REPLACE_WITH_ECR_IMAGE>
+        ports:
+        - containerPort: <80>
+	  imagePullSecrets:
+      - name: <secret>
