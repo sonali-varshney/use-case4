@@ -17,9 +17,6 @@ provider "kubernetes" {
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority.0.data)
     load_config_file = false
     }
-}
-
-
 
 resource "aws_vpc" "vpcdemo" {
   cidr_block = "10.0.0.0/16"
