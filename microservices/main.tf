@@ -99,10 +99,20 @@ resource "aws_eks_cluster" "myekscluster" {
 #    endpoint_public_access  = true
   }
 
+  # Enable desired log types for the control plane to send to cloudwatch
+  enabled_cluster_log_types = [
+    "api",
+    "audit",
+    "authenticator",
+    "controllerManager",
+    "scheduler"
+  ]
+
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling. Otherwise, EKS will not be able to
   # properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
+    aws_cloudwatch_log_group.eks_cluster_log_group,
   ]
 }
 
@@ -195,4 +205,15 @@ resource "aws_iam_role_policy_attachment" "eks_node_policy_2" {
 resource "aws_iam_role_policy_attachment" "eks_node_policy_3" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+
+ ########################################## EKS Control Plane Logging  ######################################################
+
+# You need a log group to manage the retention policy for the EKS logs.
+# EKS automatically creates the log streams within this log group.
+resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
+  # The log group name must be in the format /aws/eks/<cluster-name>/cluster
+  name              = "/aws/eks/${aws_eks_cluster.myekscluster.name}/cluster"
+  retention_in_days = 1 # Customize retention as needed.
 }
