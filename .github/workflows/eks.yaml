@@ -9,9 +9,9 @@ jobs:
     defaults:
       run:
         working-directory: microservices
-    permissions:    # NOTE
-      id-token: write
-      contents: read
+    # permissions:    # NOTE
+    #   id-token: write
+    #   contents: read
     steps:
      - name: Checkout
        uses: actions/checkout@v5.0.0
