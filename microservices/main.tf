@@ -2,21 +2,21 @@ provider "aws"{
   region = "us-east-1"
 }
 
-provider "helm" {
-    kubernetes = {
-        host  = data.aws_eks_cluster.eks_cluster.endpoint
-        token = data.aws_eks_cluster_auth.eks_auth.token
-        cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority.0.data)
-        load_config_file = false
-    }
-}
+#provider "helm" {
+#    kubernetes = {
+#        host  = data.aws_eks_cluster.eks_cluster.endpoint
+#        token = data.aws_eks_cluster_auth.eks_auth.token
+#       cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority.0.data)
+#        load_config_file = false
+#    }
+#}
 
-provider "kubernetes" {
-    host  = data.aws_eks_cluster.eks_cluster.endpoint
-    token = data.aws_eks_cluster_auth.eks_auth.token
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority.0.data)
-    load_config_file = false
-    }
+#provider "kubernetes" {
+#    host  = data.aws_eks_cluster.eks_cluster.endpoint
+#    token = data.aws_eks_cluster_auth.eks_auth.token
+#    cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_cluster.certificate_authority.0.data)
+#    load_config_file = false
+#    }
 
 resource "aws_vpc" "vpcdemo" {
   cidr_block = "10.0.0.0/16"
