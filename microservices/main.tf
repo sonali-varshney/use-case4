@@ -235,14 +235,14 @@ resource "aws_iam_role_policy_attachment" "eks_node_policy_3" {
 # EKS automatically creates the log streams within this log group.
 resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
   # The log group name must be in the format /aws/eks/<cluster-name>/cluster
-  name              = "/aws/eks/${aws_eks_cluster.myekscluster.name}/cluster"
+  name              = "/aws/eks/myekscluster/cluster"   # note yha var.clustername de do..and us var ki value hath ki hath define kr do nhi to cycle wali error aa jaegi
   retention_in_days = 1 # Customize retention as needed.
 }
 
 ######################################### CloudWatch log group for application logs (optional consolidation point)  #########################################
 
 resource "aws_cloudwatch_log_group" "app_logs" {
-  name              = "/aws/eks/${var.cluster_name}/app-logs"
+  name              = "/aws/eks/myekscluster/app-logs"   # note yha var.clustername de do..and us var ki value hath ki hath define kr do nhi to cycle wali error aa jaegi
   retention_in_days = 30
 }
 
