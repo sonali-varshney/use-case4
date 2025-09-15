@@ -50,11 +50,11 @@ jobs:
     #    run: tflint -f compact --recursive
     #    continue-on-error: true # Allow TFLint to run to completion and post results
        
-     - name: plan
-       run: terraform plan
+     # - name: plan
+     #   run: terraform plan
 
-     - name: apply
-       run: terraform apply -auto-approve
+     # - name: apply
+     #   run: terraform apply -auto-approve
     
     #  - name: Install kubectl
     #    uses: azure/setup-kubectl@v4
