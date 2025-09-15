@@ -278,7 +278,7 @@ resource "aws_cloudwatch_log_group" "app_logs" {
 # You will get the oidc issuer from the EKS cluster's identity attribute.
 # The URL has a format like `https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633FE2947F11B9947990479F63`
 data "tls_certificate" "oidc_thumbprint" {
-  url = aaws_eks_cluster.myekscluster.identity[0].oidc[0].issuer
+  url = aws_eks_cluster.myekscluster.identity[0].oidc[0].issuer
 }
 
 # The `aws_iam_openid_connect_provider` resource can now reference the
@@ -308,7 +308,7 @@ data "aws_caller_identity" "current" {}
 # Use the `aws_eks_cluster` resource directly to get the cluster's OIDC issuer URL.
 # The OIDC provider ARN is a combination of the account ID and the cluster's issuer URL.
 locals {
-  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.example.identity.oidc.issuer, "https://", "")}"
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.myekscluster.identity.oidc.issuer, "https://", "")}"
 }
 
 # IAM Role for Service Account (IRSA)
