@@ -32,6 +32,7 @@ resource "aws_vpc" "vpcdemo" {
     Name = "myvpc"
   }
   enable_dns_hostnames = true # if not enabled, we can't resolve dns names
+  enable_dns_support = true
 }
 
 resource "aws_subnet" "pubsubnet" {
@@ -53,6 +54,16 @@ resource "aws_internet_gateway" "igw" {
   tags = {
     Name = "igw"
   }
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.my_elastic_ip.id
+  subnet_id     = aws_subnet.pubsubnet.id
+
+  tags = {
+    Name = "NAT gw"
+  }
+  depends_on = [aws_internet_gateway.igw]
 }
 
 resource "aws_route_table" "pub_route_table" {
@@ -94,10 +105,10 @@ resource "aws_subnet" "prv_subnet" {
 resource "aws_route_table" "priv_route_table" {
   vpc_id = aws_vpc.vpcdemo.id
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_nat_gateway.nat.id
-#   }
+   route {
+     cidr_block = "0.0.0.0/0"
+     gateway_id = aws_nat_gateway.nat.id
+   }
 
   tags = {
     Name = "private route table"
