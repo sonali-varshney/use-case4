@@ -24,7 +24,7 @@ jobs:
 
       - name: Update kubeconfig
         run: |
-          aws eks update-kubeconfig --name myekscluster --region ap-south-1
+          aws eks update-kubeconfig --name myekscluster --region us-east-1
 
       - name: Test kubernetes cluster and nodes are created or not
         run: kubectl get nodes
