@@ -34,6 +34,15 @@ jobs:
       #     kubectl apply -f k8s-manifests/deployment.yaml
       #     kubectl apply -f k8s-manifests/service.yaml
       # #     kubectl apply -f k8s-manifests/ingress.yaml
+      - name: Install eksctl
+        uses: eksctl-io/eksctl-action@v2
+        with:
+          version: '0.195.0' # Specify a specific version or use 'latest'
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.15.0' # Specify a specific version or use 'v3.x'
       - name: Setup AWS Load Balancer Controller IAM Policy and Service Account
         run: |
           POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
