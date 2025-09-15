@@ -355,7 +355,7 @@ resource "aws_security_group" "eks_node_sg" {
   # Ingress rule: Allow intra-node communication
   ingress {
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0 #65535
     protocol    = "-1"
     self        = true
     description = "Allow all intra-node traffic"
