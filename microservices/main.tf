@@ -352,7 +352,7 @@ resource "aws_security_group" "eks_node_sg" {
  #   description     = "Allow NodePort traffic from ALB"
  # }
 
-  # Ingress rule: Allow intra-node communication
+  # Ingress rule: Allow intra-node communication and pod to pod comm.
   ingress {
     from_port   = 0
     to_port     = 0 #65535
@@ -379,4 +379,150 @@ resource "aws_security_group" "eks_node_sg" {
     description = "Allow all outbound traffic"
   }
 }
+
+####################################################################################
+
+##############################Create OIDC Provider for IAM Roles for Service Accounts (IRSA) ###########################
+
+# You will get the oidc issuer from the EKS cluster's identity attribute.
+# The URL has a format like `https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633FE2947F11B9947990479F63`
+data "tls_certificate" "oidc_thumbprint" {
+  url = aws_eks_cluster.myekscluster.identity[0].oidc[0].issuer
+}
+
+# The `aws_iam_openid_connect_provider` resource can now reference the
+# values from the `aws_eks_cluster` and `tls_certificate` data sources.
+resource "aws_iam_openid_connect_provider" "oidc" {
+  url             = aws_eks_cluster.myekscluster.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc_thumbprint.certificates[0].sha1_fingerprint]
+}
+
+
+############################## Create IAM Policy & Role for ALB Controller ##############################
+
+data "http" "alb_policy" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.1/docs/install/iam_policy.json"
+}
+
+resource "aws_iam_policy" "alb_controller" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "Policy for AWS Load Balancer Controller"
+  policy      = data.http.alb_policy.response_body
+}
+
+# Fetch the current AWS account ID.
+data "aws_caller_identity" "current" {}
+
+# Use the `aws_eks_cluster` resource directly to get the cluster's OIDC issuer URL.
+# The OIDC provider ARN is a combination of the account ID and the cluster's issuer URL.
+locals {
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.myekscluster.identity[0].oidc[0].issuer, "https://", "")}"
+}
+
+# IAM Role for Service Account (IRSA)
+module "alb_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0"
+
+  role_name                      = "alb-controller"
+  attach_load_balancer_controller_policy = true
+  oidc_providers = {
+    main = {
+      # Use the dynamically constructed OIDC provider ARN.
+      provider_arn               = local.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+    }
+  }
+}
+
+#This maps the Kubernetes ServiceAccount kube-system/aws-load-balancer-controller → IAM role with the policy.
+
+############################## Install AWS Load Balancer Controller via Helm ##############################
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = "1.7.1" # check latest
+
+    set = [
+    {
+      name  = "clusterName"
+      value = aws_eks_cluster.myekscluster.name #var.cluster_name
+    },
+    {
+      name  = "serviceAccount.create"
+      value = "false"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = "aws-load-balancer-controller"
+    },
+    {
+      name  = "region"
+      value = "us-east-1" #var.aws_region
+    },
+    {
+      name  = "vpcId"
+      value = aws_vpc.vpcdemo.id # module.vpc.vpc_id
+    }
+    ]
+  depends_on = [module.alb_irsa_role]
+}
+
+#Notice serviceAccount.create = false → because we want Helm to use the pre-created ServiceAccount with IAM role binding.So you must also create the service account (K8s object) with Terraform (or kubectl):
+
+######################################### Service Account #########################################
+
+resource "kubernetes_service_account" "alb_sa" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "kube-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.alb_irsa_role.iam_role_arn
+    }
+  }
+}
+
+
+
+
+
+
+# --- ALB Security Group ---
+resource "aws_security_group" "alb_sg" {
+  name_prefix = "alb-sg-"
+  vpc_id      = aws_vpc.vpcdemo.id
+
+  # Ingress rule: Allow HTTP/HTTPS from the internet
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP traffic from internet"
+  }
+
+  # Ingress rule: Allow HTTPS from the internet (recommended)
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTPS traffic from internet"
+  }
+
+  # Egress rule: Allow traffic to the EKS worker nodes on the NodePort range
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = -1
+    #security_groups = [aws_security_group.eks_node_sg.id]
+	cidr_blocks = ["0.0.0.0/0"]
+    description     = "Allow traffic to EKS worker nodes"
+  }
+}
+
 
