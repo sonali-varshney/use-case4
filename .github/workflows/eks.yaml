@@ -76,8 +76,8 @@ jobs:
 
      # # - name: destroy
      # #   run: terraform destroy -auto-approve
-     # - name: destroy
-     #   run: terraform destroy -auto-approve
+     - name: destroy
+       run: terraform destroy -auto-approve
 
     #  - name: check if a specific repository exists in ECR or not.If not then create it
     #    run: aws ecr create-repository --repository-name flaskrepo >/dev/null 2>&1 || true #By default,It will return an error if the repository is not found. the failed command will print an error message to your terminal's standard error stream. To suppress this output and have a completely clean command, you can redirect the error stream to /dev/null
