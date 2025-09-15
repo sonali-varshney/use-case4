@@ -32,10 +32,10 @@ jobs:
    #  - name: Test AWS Connection
    #    run:  aws sts get-caller-identity # if it is succeeded , it will show assumed IAM role. It will fail if you slct another branch bcz in OIDC we gave main branch
         
-     # - name: init
-     #   run: terraform init
-     # - name: validate
-     #   run: terraform validate     
+     - name: init
+       run: terraform init
+     - name: validate
+       run: terraform validate     
 
     #  - name: Setup TFLint
     #    uses: terraform-linters/setup-tflint@v5.0.0
@@ -50,8 +50,8 @@ jobs:
     #    run: tflint -f compact --recursive
     #    continue-on-error: true # Allow TFLint to run to completion and post results
        
-     # - name: plan
-     #   run: terraform plan
+     - name: plan
+       run: terraform plan
 
      # - name: apply
      #   run: terraform apply -auto-approve
@@ -61,20 +61,20 @@ jobs:
      # - name: destroy
      #   run: terraform destroy -auto-approve
 
-     - name: check if a specific repository exists in ECR or not.If not then create it
-       run: aws ecr create-repository --repository-name flaskrepo >/dev/null 2>&1 || true #By default,It will return an error if the repository is not found. the failed command will print an error message to your terminal's standard error stream. To suppress this output and have a completely clean command, you can redirect the error stream to /dev/null
+    #  - name: check if a specific repository exists in ECR or not.If not then create it
+    #    run: aws ecr create-repository --repository-name flaskrepo >/dev/null 2>&1 || true #By default,It will return an error if the repository is not found. the failed command will print an error message to your terminal's standard error stream. To suppress this output and have a completely clean command, you can redirect the error stream to /dev/null
 
-     - name: Build the docker image
-       run: docker build -t pythonapp .
+    #  - name: Build the docker image
+    #    run: docker build -t pythonapp .
 
-     - name: Login to ECR
-       run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 561947681169.dkr.ecr.us-east-1.amazonaws.com/flaskrepo
+    #  - name: Login to ECR
+    #    run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 561947681169.dkr.ecr.us-east-1.amazonaws.com/flaskrepo
        
-     - name: Tag the image
-       run: docker tag pythonapp:latest 561947681169.dkr.ecr.us-east-1.amazonaws.com/flaskrepo:latest
+    #  - name: Tag the image
+    #    run: docker tag pythonapp:latest 561947681169.dkr.ecr.us-east-1.amazonaws.com/flaskrepo:latest
 
-     - name: push the image to ECR
-       run: docker push 561947681169.dkr.ecr.us-east-1.amazonaws.com/appointmentrepo:latest
+    #  - name: push the image to ECR
+    #    run: docker push 561947681169.dkr.ecr.us-east-1.amazonaws.com/appointmentrepo:latest
        
 
     
