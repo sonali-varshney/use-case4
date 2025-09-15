@@ -46,7 +46,7 @@ jobs:
           --cluster=myekscluster \
           --namespace=kube-system \
           --name=aws-load-balancer-controller \
-          --attach-policy-arn=arn:aws:iam::<accid>:policy/AWSLoadBalancerControllerIAMPolicy \
+          --attach-policy-arn=arn:aws:iam::561947681169:policy/AWSLoadBalancerControllerIAMPolicy \
           --override-existing-serviceaccounts \
           --region us-east-1 \
           --approve
