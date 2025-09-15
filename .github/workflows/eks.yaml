@@ -55,6 +55,24 @@ jobs:
 
      - name: apply
        run: terraform apply -auto-approve
+    
+    #  - name: Install kubectl
+    #    uses: azure/setup-kubectl@v4
+    #    with:
+    #      version: '1.28.0'
+
+    #  - name: Update kubeconfig
+    #    run: |
+    #      aws eks update-kubeconfig --name myekscluster --region us-east-1
+
+    #  - name: Test kubernetes cluster and nodes are created or not
+    #    run: kubectl get nodes
+
+    #  - name: Apply Kubernetes manifests
+    #    run: |
+    #      kubectl apply -f k8s-manifests/deployment.yaml
+    #      kubectl apply -f k8s-manifests/service.yaml
+    #      kubectl apply -f k8s-manifests/ingress.yaml
 
      # # - name: destroy
      # #   run: terraform destroy -auto-approve
