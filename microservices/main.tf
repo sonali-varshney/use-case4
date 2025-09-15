@@ -357,7 +357,7 @@ resource "helm_release" "aws_load_balancer_controller" {
     },
     {
       name  = "vpcId"
-      value = aws_vpc.vpcdemo # module.vpc.vpc_id
+      value = aws_vpc.vpcdemo.id # module.vpc.vpc_id
     }
     ]
   depends_on = [module.alb_irsa_role]
