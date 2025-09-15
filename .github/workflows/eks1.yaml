@@ -29,60 +29,60 @@ jobs:
       - name: Test kubernetes cluster and nodes are created or not
         run: kubectl get nodes
 
-      # - name: Apply Kubernetes manifests
+      # - name: Install eksctl
       #   run: |
-      #     kubectl apply -f k8s-manifests/deployment.yaml
-      #     kubectl apply -f k8s-manifests/service.yaml
-      # #     kubectl apply -f k8s-manifests/ingress.yaml
-      #- name: Install eksctl
-      - name: Install eksctl
-        run: |
-          ARCH=amd64 # For ARM, use 'arm64'
-          PLATFORM=$(uname -s)_$ARCH
-          curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+      #     ARCH=amd64 # For ARM, use 'arm64'
+      #     PLATFORM=$(uname -s)_$ARCH
+      #     curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
     
-          tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
-          sudo mv /tmp/eksctl /usr/local/bin
+      #     tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+      #     sudo mv /tmp/eksctl /usr/local/bin
     
-          eksctl version
+      #     eksctl version
 
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: 'v3.15.0' # Specify a specific version or use 'v3.x'
-      - name: Setup AWS Load Balancer Controller IAM Policy and Service Account
+      # - name: Install Helm
+      #   uses: azure/setup-helm@v4
+      #   with:
+      #     version: 'v3.15.0' # Specify a specific version or use 'v3.x'
+      # - name: Setup AWS Load Balancer Controller IAM Policy and Service Account
+      #   run: |
+      #     POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
+      #     POLICY_ARN="arn:aws:iam::561947681169:policy/${POLICY_NAME}"
+
+      #     # Check if the policy already exists
+      #     if aws iam get-policy --policy-arn "${POLICY_ARN}" > /dev/null 2>&1; then
+      #       echo "IAM policy ${POLICY_NAME} already exists. Skipping creation."
+      #     else
+      #       echo "IAM policy ${POLICY_NAME} does not exist. Creating it now."
+      #       curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json
+      #       aws iam create-policy --policy-name "${POLICY_NAME}" --policy-document file://iam_policy.json
+      #     fi
+
+      #     eksctl create iamserviceaccount \
+      #     --cluster=myekscluster \
+      #     --namespace=kube-system \
+      #     --name=aws-load-balancer-controller \
+      #     --attach-policy-arn=arn:aws:iam::561947681169:policy/AWSLoadBalancerControllerIAMPolicy \
+      #     --override-existing-serviceaccounts \
+      #     --region us-east-1 \
+      #     --approve
+
+      # - name: Install AWS Load Balancer Controller
+      #   run: |
+      #     helm repo add eks https://aws.github.io/eks-charts
+      #     helm repo update eks
+      #     helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+      #     -n kube-system \
+      #     --set clusterName=myekscluster \
+      #     --set serviceAccount.create=false \
+      #     --set serviceAccount.name=aws-load-balancer-controller \
+      #     --version 1.13.0
+
+      # - name: Verify ingress Alb controller is installed or not
+      #   run: kubectl get deployment -n kube-system aws-load-balancer-controller
+
+      - name: Apply Kubernetes manifests
         run: |
-          POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
-          POLICY_ARN="arn:aws:iam::561947681169:policy/${POLICY_NAME}"
-
-          # Check if the policy already exists
-          if aws iam get-policy --policy-arn "${POLICY_ARN}" > /dev/null 2>&1; then
-            echo "IAM policy ${POLICY_NAME} already exists. Skipping creation."
-          else
-            echo "IAM policy ${POLICY_NAME} does not exist. Creating it now."
-            curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json
-            aws iam create-policy --policy-name "${POLICY_NAME}" --policy-document file://iam_policy.json
-          fi
-
-          eksctl create iamserviceaccount \
-          --cluster=myekscluster \
-          --namespace=kube-system \
-          --name=aws-load-balancer-controller \
-          --attach-policy-arn=arn:aws:iam::561947681169:policy/AWSLoadBalancerControllerIAMPolicy \
-          --override-existing-serviceaccounts \
-          --region us-east-1 \
-          --approve
-
-      - name: Install AWS Load Balancer Controller
-        run: |
-          helm repo add eks https://aws.github.io/eks-charts
-          helm repo update eks
-          helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-          -n kube-system \
-          --set clusterName=myekscluster \
-          --set serviceAccount.create=false \
-          --set serviceAccount.name=aws-load-balancer-controller \
-          --version 1.13.0
-
-      - name: Verify ingress Alb controller is installed or not
-        run: kubectl get deployment -n kube-system aws-load-balancer-controller
+          kubectl apply -f k8s-manifests/deployment.yaml
+          kubectl apply -f k8s-manifests/service.yaml
+          kubectl apply -f k8s-manifests/ingress.yaml
