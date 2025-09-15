@@ -59,7 +59,7 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_eip" "my_elastic_ip" {
   count = 2
-  vpc   = true
+  #vpc   = true
 }
 
 resource "aws_nat_gateway" "nat" {
