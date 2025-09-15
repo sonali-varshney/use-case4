@@ -58,8 +58,8 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "my_elastic_ip" {
-  count = 2
-  vpc   = true
+  #count = 1
+  #vpc   = true
 }
 
 resource "aws_nat_gateway" "nat" {
@@ -344,13 +344,13 @@ resource "aws_security_group" "eks_node_sg" {
   # Ingress rule: Allow NodePort traffic from the ALB
   # This rule is automatically managed by the AWS Load Balancer Controller.
   # We create it here for completeness, but the controller will reconcile it.
-  ingress {
-    from_port       = 30000
-    to_port         = 32767
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]
-    description     = "Allow NodePort traffic from ALB"
-  }
+ # ingress {
+ #   from_port       = 30000
+ #   to_port         = 32767
+ #   protocol        = "tcp"
+ #   security_groups = [aws_security_group.alb_sg.id]
+ #   description     = "Allow NodePort traffic from ALB"
+ # }
 
   # Ingress rule: Allow intra-node communication
   ingress {
