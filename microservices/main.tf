@@ -341,7 +341,7 @@ resource "helm_release" "aws_load_balancer_controller" {
     set = [
     {
       name  = "clusterName"
-      value = aws_eks_cluster.myekscluster.cluster_name #var.cluster_name
+      value = aws_eks_cluster.myekscluster.name #var.cluster_name
     },
     {
       name  = "serviceAccount.create"
@@ -353,11 +353,11 @@ resource "helm_release" "aws_load_balancer_controller" {
     },
     {
       name  = "region"
-      value = us-east-1 #var.aws_region
+      value = "us-east-1" #var.aws_region
     },
     {
       name  = "vpcId"
-      value = module.vpc.vpc_id
+      value = aws_vpc.vpcdemo # module.vpc.vpc_id
     }
     ]
   depends_on = [module.alb_irsa_role]
