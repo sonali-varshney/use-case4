@@ -3,7 +3,7 @@ output "cluster_name" {
 }
 
 output "kubeconfig_command" {
-  value = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_id}"
+  value = "aws eks update-kubeconfig --region us-east-1 --name ${module.eks.cluster_id}"
 }
 
 output "eks_cluster_endpoint" {

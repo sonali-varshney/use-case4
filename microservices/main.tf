@@ -263,7 +263,7 @@ resource "helm_release" "aws_for_fluent_bit" {
     <<EOF
 cloudwatch:
   enabled: true
-  region: ${var.aws_region}
+  region: us-east-1
   log_group_name: ${aws_cloudwatch_log_group.app_logs.name}
   log_stream_prefix: from-fluent-bit-
   # Optionally multi-line parsing, filters etc
