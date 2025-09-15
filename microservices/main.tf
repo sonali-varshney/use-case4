@@ -65,7 +65,6 @@ resource "aws_eip" "my_elastic_ip" {
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.my_elastic_ip.id
   subnet_id     = aws_subnet.pubsubnet[*].id #aws_subnet.pubsubnet.id
-  count
 
   tags = {
     Name = "NAT gw"
