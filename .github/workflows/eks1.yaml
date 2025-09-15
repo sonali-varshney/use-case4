@@ -37,7 +37,7 @@ jobs:
       - name: Install eksctl
         uses: eksctl-io/eksctl-action@v2
         with:
-          version: '0.195.0' # Specify a specific version or use 'latest'
+          version: latest # Specify a specific version or use 'latest'
 
       - name: Install Helm
         uses: azure/setup-helm@v4
