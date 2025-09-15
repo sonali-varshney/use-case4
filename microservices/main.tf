@@ -380,37 +380,3 @@ resource "aws_security_group" "eks_node_sg" {
   }
 }
 
-# --- ALB Security Group ---
-resource "aws_security_group" "alb_sg" {
-  name_prefix = "alb-sg-"
-  vpc_id      = aws_vpc.vpcdemo.id
-
-  # Ingress rule: Allow HTTP/HTTPS from the internet
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTP traffic from internet"
-  }
-
-  # Ingress rule: Allow HTTPS from the internet (recommended)
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTPS traffic from internet"
-  }
-
-  # Egress rule: Allow traffic to the EKS worker nodes on the NodePort range
-  egress {
-    from_port       = 0
-    to_port         = 65535
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_node_sg.id]
-    description     = "Allow traffic to EKS worker nodes"
-  }
-}
-
-
