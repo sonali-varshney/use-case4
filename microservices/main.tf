@@ -59,13 +59,13 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_eip" "my_elastic_ip" {
   count = 2
-  #vpc   = true
+  vpc   = true
 }
 
 resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.my_elastic_ip[*].id
+  allocation_id = aws_eip.my_elastic_ip.id
   subnet_id     = aws_subnet.pubsubnet[*].id #aws_subnet.pubsubnet.id
-  count = 2
+  count
 
   tags = {
     Name = "NAT gw"
@@ -111,22 +111,21 @@ resource "aws_subnet" "prv_subnet" {
 
 resource "aws_route_table" "priv_route_table" {
   vpc_id = aws_vpc.vpcdemo.id
-  count = 2
 
    route {
      cidr_block = "0.0.0.0/0"
-     gateway_id = aws_nat_gateway.nat[count.index].id
+     gateway_id = aws_nat_gateway.nat.id
    }
 
   tags = {
-    Name = "private route table-${count.index}"
+    Name = "private route table"
   }
 }
 
 resource "aws_route_table_association" "associate_with_prv_subnet" {
   count          = 2 
   subnet_id      = element(aws_subnet.prv_subnet[*].id, count.index) #aws_subnet.prv_subnet.id
-  route_table_id = aws_route_table.priv_route_table[count.index].id
+  route_table_id = aws_route_table.priv_route_table.id
 }
 
 #################################### CREATE EKS CLUSTER ###################################
@@ -301,4 +300,118 @@ resource "aws_cloudwatch_log_group" "app_logs" {
 #   depends_on = [aws_eks_cluster.myekscluster,] #[module.eks]
 # }
 #This deploys Fluent Bit that reads pod logs and ships to CloudWatch Logs. You can also install the CloudWatch Container Insights agent if you need metrics; many teams combine both.
+
+###################### Create sec gp #####################
+
+# --- EKS Worker Node Security Group ---
+resource "aws_security_group" "eks_control_plane_sg" {
+  name_prefix = "eks-control-plane-sg-"
+  vpc_id      = aws_vpc.vpcdemo.id
+
+  # Ingress rule: Allow inbound traffic for kubectl access
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+    description     = "Allow traffic from EKS Control Plane"
+  }
+
+  # Egress rule: Allow traffic to the EKS control plane
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Allow traffic to EKS Control Plane"
+  }
+
+
+
+# --- EKS Worker Node Security Group ---
+resource "aws_security_group" "eks_node_sg" {
+  name_prefix = "eks-node-group-sg-"
+  vpc_id      = aws_vpc.vpcdemo.id
+
+  # Ingress rule: Allow inbound traffic from the EKS control plane
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_control_plane_sg]
+    description     = "Allow traffic from EKS Control Plane"
+  }
+
+  # Ingress rule: Allow NodePort traffic from the ALB
+  # This rule is automatically managed by the AWS Load Balancer Controller.
+  # We create it here for completeness, but the controller will reconcile it.
+  ingress {
+    from_port       = 30000
+    to_port         = 32767
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+    description     = "Allow NodePort traffic from ALB"
+  }
+
+  # Ingress rule: Allow intra-node communication
+  ingress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "-1"
+    self        = true
+    description = "Allow all intra-node traffic"
+  }
+
+  # Egress rule: Allow traffic to the EKS control plane
+  egress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_control_plane_sg.id]
+    description     = "Allow traffic to EKS Control Plane"
+  }
+
+  # Egress rule: Allow all outbound traffic (routed via NAT Gateway in private subnet)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+}
+
+# --- ALB Security Group ---
+resource "aws_security_group" "alb_sg" {
+  name_prefix = "alb-sg-"
+  vpc_id      = aws_vpc.vpcdemo.id
+
+  # Ingress rule: Allow HTTP/HTTPS from the internet
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP traffic from internet"
+  }
+
+  # Ingress rule: Allow HTTPS from the internet (recommended)
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTPS traffic from internet"
+  }
+
+  # Egress rule: Allow traffic to the EKS worker nodes on the NodePort range
+  egress {
+    from_port       = 0
+    to_port         = 65535
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_node_sg.id]
+    description     = "Allow traffic to EKS worker nodes"
+  }
+}
+
 
