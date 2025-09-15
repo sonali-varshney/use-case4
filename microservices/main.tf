@@ -78,14 +78,14 @@ resource "aws_route_table_association" "associate_with_pub_subnet" {
 
 resource "aws_subnet" "prv_subnet" {
   vpc_id     = aws_vpc.vpcdemo.id
-  #count      = 2                      #Note
+  count      = 2                      #Note
 
-  cidr_block = "10.0.2.0/24"               #Note
-  availability_zone = "us-east-1c"  #Note
+  cidr_block = ["10.0.2.0/24","10.0.3.0/24"][count.index]              #Note
+  availability_zone = ["us-east-1c","us-east-1d"][count.index]  #Note
   map_public_ip_on_launch = false   # to indicate that instances launched into the subnet should not be assigned a public IP address
   
   tags = {
-    Name = "prvsubnet"
+    Name = "prvsubnet-${count.index}"
   }
 }
 
@@ -103,8 +103,8 @@ resource "aws_route_table" "priv_route_table" {
 }
 
 resource "aws_route_table_association" "associate_with_prv_subnet" {
-  #count          = 2 
-  subnet_id      = aws_subnet.prv_subnet.id
+  count          = 2 
+  subnet_id      = element(aws_subnet.prv_subnet[*].id, count.index) #aws_subnet.prv_subnet.id
   route_table_id = aws_route_table.priv_route_table.id
 }
 
