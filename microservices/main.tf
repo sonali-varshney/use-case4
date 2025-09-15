@@ -64,7 +64,7 @@ resource "aws_eip" "my_elastic_ip" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.my_elastic_ip.id
-  subnet_id     = aws_subnet.pubsubnet.id #aws_subnet.pubsubnet[*].id
+  subnet_id     = aws_subnet.pubsubnet[0].id #aws_subnet.pubsubnet[*].id
 
   tags = {
     Name = "NAT gw"
