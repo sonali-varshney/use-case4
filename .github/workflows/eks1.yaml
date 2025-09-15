@@ -36,11 +36,17 @@ jobs:
       # #     kubectl apply -f k8s-manifests/ingress.yaml
       - name: Setup AWS Load Balancer Controller IAM Policy and Service Account
         run: |
-          curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json
-          
-          aws iam create-policy \
-          --policy-name AWSLoadBalancerControllerIAMPolicy \
-          --policy-document file://iam_policy.json
+          POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
+          POLICY_ARN="arn:aws:iam::561947681169:policy/${POLICY_NAME}"
+
+          # Check if the policy already exists
+          if aws iam get-policy --policy-arn "${POLICY_ARN}" > /dev/null 2>&1; then
+            echo "IAM policy ${POLICY_NAME} already exists. Skipping creation."
+          else
+            echo "IAM policy ${POLICY_NAME} does not exist. Creating it now."
+            curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json
+            aws iam create-policy --policy-name "${POLICY_NAME}" --policy-document file://iam_policy.json
+          fi
 
           eksctl create iamserviceaccount \
           --cluster=myekscluster \
