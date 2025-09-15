@@ -9,6 +9,6 @@ spec:
   selector:
     app: flaskapp
   ports:
-    - port: <>
-      targetPort: <>
+    - port: 5000
+      targetPort: 5000
       protocol: TCP
