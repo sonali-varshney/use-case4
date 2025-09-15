@@ -92,6 +92,6 @@ jobs:
 
       - name: check why controller is not wrkng
           kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
-          kubectl describe pod <pod-name> -n kube-system
-          kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
-          kubectl get endpoints -n kube-system aws-load-balancer-webhook-service
+          # kubectl describe pod <pod-name> -n kube-system
+          # kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+          # kubectl get endpoints -n kube-system aws-load-balancer-webhook-service
