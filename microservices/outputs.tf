@@ -1,5 +1,5 @@
 output "cluster_name" {
-  value = aws_eks_cluster.myekscluster #module.eks.cluster_id
+  value = aws_eks_cluster.myekscluster.cluster_id #module.eks.cluster_id
 }
 
 # output "kubeconfig_command" {
@@ -7,5 +7,5 @@ output "cluster_name" {
 # }
 
 output "eks_cluster_endpoint" {
-  value = aws_eks_cluster.myekscluster # module.eks.cluster_endpoint
+  value = aws_eks_cluster.myekscluster.cluster_endpoint # module.eks.cluster_endpoint
 }
