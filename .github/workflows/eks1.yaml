@@ -34,7 +34,7 @@ jobs:
       #     kubectl apply -f k8s-manifests/deployment.yaml
       #     kubectl apply -f k8s-manifests/service.yaml
       # #     kubectl apply -f k8s-manifests/ingress.yaml
-      - name:
+      - name: alb controller install
         run: |
           curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.13.3/docs/install/iam_policy.json
           
