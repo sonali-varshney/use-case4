@@ -84,8 +84,14 @@ jobs:
       # - name: Verify ingress Alb controller is installed or not
       #   run: kubectl get deployment -n kube-system aws-load-balancer-controller
 
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f ./deployment.yaml
-          kubectl apply -f ./service.yaml
-          kubectl apply -f ./ingress.yaml
+      # - name: Apply Kubernetes manifests
+      #   run: |
+      #     kubectl apply -f ./deployment.yaml
+      #     kubectl apply -f ./service.yaml
+      #     kubectl apply -f ./ingress.yaml
+
+      - name: check why controller is not wrkng
+          kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+          kubectl describe pod <pod-name> -n kube-system
+          kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+          kubectl get endpoints -n kube-system aws-load-balancer-webhook-service
