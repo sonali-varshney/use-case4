@@ -302,7 +302,7 @@ resource "aws_cloudwatch_log_group" "app_logs" {
 
 ###################### Create sec gp #####################
 
-# --- EKS Worker Node Security Group ---
+# --- EKS control-plane Security Group ---
 resource "aws_security_group" "eks_control_plane_sg" {
   name_prefix = "eks-control-plane-sg-"
   vpc_id      = aws_vpc.vpcdemo.id
@@ -324,7 +324,7 @@ resource "aws_security_group" "eks_control_plane_sg" {
     cidr_blocks = ["0.0.0.0/0"]
     description     = "Allow traffic to EKS Control Plane"
   }
-
+}
 
 
 # --- EKS Worker Node Security Group ---
