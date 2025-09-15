@@ -58,11 +58,14 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "my_elastic_ip" {
+  count = 2
+  vpc   = true
 }
 
 resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.my_elastic_ip.id
+  allocation_id = aws_eip.my_elastic_ip[*].id
   subnet_id     = aws_subnet.pubsubnet[*].id #aws_subnet.pubsubnet.id
+  count = 2
 
   tags = {
     Name = "NAT gw"
@@ -108,21 +111,22 @@ resource "aws_subnet" "prv_subnet" {
 
 resource "aws_route_table" "priv_route_table" {
   vpc_id = aws_vpc.vpcdemo.id
+  count = 2
 
    route {
      cidr_block = "0.0.0.0/0"
-     gateway_id = aws_nat_gateway.nat.id
+     gateway_id = aws_nat_gateway.nat[count.index].id
    }
 
   tags = {
-    Name = "private route table"
+    Name = "private route table-${count.index}"
   }
 }
 
 resource "aws_route_table_association" "associate_with_prv_subnet" {
   count          = 2 
   subnet_id      = element(aws_subnet.prv_subnet[*].id, count.index) #aws_subnet.prv_subnet.id
-  route_table_id = aws_route_table.priv_route_table.id
+  route_table_id = aws_route_table.priv_route_table[count.index].id
 }
 
 #################################### CREATE EKS CLUSTER ###################################
