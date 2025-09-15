@@ -308,7 +308,7 @@ data "aws_caller_identity" "current" {}
 # Use the `aws_eks_cluster` resource directly to get the cluster's OIDC issuer URL.
 # The OIDC provider ARN is a combination of the account ID and the cluster's issuer URL.
 locals {
-  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.myekscluster.identity.oidc.issuer, "https://", "")}"
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(aws_eks_cluster.myekscluster.identity[0].oidc[0].issuer, "https://", "")}"
 }
 
 # IAM Role for Service Account (IRSA)
