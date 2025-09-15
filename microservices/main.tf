@@ -64,7 +64,7 @@ resource "aws_eip" "my_elastic_ip" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.my_elastic_ip.id
-  subnet_id     = aws_subnet.pubsubnet[*].id #aws_subnet.pubsubnet.id
+  subnet_id     = aws_subnet.pubsubnet.id #aws_subnet.pubsubnet[*].id
 
   tags = {
     Name = "NAT gw"
@@ -337,7 +337,7 @@ resource "aws_security_group" "eks_node_sg" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.eks_control_plane_sg]
+    security_groups = [aws_security_group.eks_control_plane_sg.id]
     description     = "Allow traffic from EKS Control Plane"
   }
 
