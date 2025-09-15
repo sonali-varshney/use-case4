@@ -26,6 +26,7 @@ terraform {
 #    load_config_file = false
 #    }
 
+
 resource "aws_vpc" "vpcdemo" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -54,6 +55,9 @@ resource "aws_internet_gateway" "igw" {
   tags = {
     Name = "igw"
   }
+}
+
+resource "aws_eip" "my_elastic_ip" {
 }
 
 resource "aws_nat_gateway" "nat" {
