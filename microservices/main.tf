@@ -65,6 +65,7 @@ resource "aws_route_table" "pub_route_table" {
 
   tags = {
     Name = "public route table"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
@@ -86,6 +87,7 @@ resource "aws_subnet" "prv_subnet" {
   
   tags = {
     Name = "prvsubnet-${count.index}"
+    "kubernetes.io/role/internal-elb" = "1"
   }
 }
 
@@ -121,7 +123,7 @@ resource "aws_eks_cluster" "myekscluster" {
   version  = "1.31"
 
   vpc_config {
-    subnet_ids = [aws_subnet.prv_subnet.id]
+    subnet_ids = aws_subnet.prv_subnet[count.index] #[aws_subnet.prv_subnet.id]
 # endpoint_private_access = false  #For a fully private cluster where kubectl access must happen from within the VPC (e.g., via a bastion host or VPN), you must:Set endpoint_private_access = true on the aws_eks_cluster resource and endpoint_public_access = false.
 
 #    endpoint_public_access  = true
@@ -151,7 +153,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = aws_eks_cluster.myekscluster.name
   node_group_name = "nodegroup"
   node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids      = [aws_subnet.prv_subnet.id]
+  subnet_ids      = aws_subnet.prv_subnet[count.index] #[aws_subnet.prv_subnet.id]
   instance_types  = ["t3.medium"]
 
   scaling_config {
